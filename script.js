@@ -56,12 +56,13 @@ let score = 0;
 let combo = 1;
 let lastClickTime = 0;
 let comboTimer = null;
-const COMBO_TIMEOUT = 1500; // 1.5 seconds to maintain combo
+const COMBO_TIMEOUT = 1500; // 1.5s (1500ms) to maintain combo
 let totalMisses = 0;
 let fastestClick = Infinity;
 let unlockedAchievements = new Set();
 let gameStartTime = null;
 let timerInterval = null;
+let maxCombo = 1; // Track the maximum combo achieved
 
 // Track if device has touch support (more reliable than user agent)
 const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -151,6 +152,10 @@ function updateCombo() {
     
     if (timeSinceLastClick < COMBO_TIMEOUT && noBtnClicks > 0) {
         combo++;
+        // Track maximum combo achieved
+        if (combo > maxCombo) {
+            maxCombo = combo;
+        }
         if (combo % 5 === 0) {
             const rect = noBtn.getBoundingClientRect();
             showComboText(rect.left + rect.width / 2, rect.top);
@@ -392,9 +397,12 @@ function handleNoButtonInteraction(e) {
     e.preventDefault();
     
     const now = Date.now();
-    const clickSpeed = now - lastClickTime;
-    if (clickSpeed > 0 && clickSpeed < fastestClick) {
-        fastestClick = clickSpeed;
+    // Track fastest click (skip first click)
+    if (noBtnClicks > 0) {
+        const clickSpeed = now - lastClickTime;
+        if (clickSpeed > 0 && clickSpeed < fastestClick) {
+            fastestClick = clickSpeed;
+        }
     }
     
     noBtnClicks++;
@@ -607,18 +615,11 @@ gameArea.addEventListener('click', (e) => {
 document.addEventListener('keydown', (e) => {
     if (e.code === 'Space' && questionScreen.classList.contains('active')) {
         e.preventDefault();
-        // Try to click the No button
-        const rect = noBtn.getBoundingClientRect();
-        const clickEvent = new MouseEvent('click', {
-            bubbles: true,
-            cancelable: true,
-            clientX: rect.left + rect.width / 2,
-            clientY: rect.top + rect.height / 2
-        });
-        noBtn.dispatchEvent(clickEvent);
+        // Direct click on No button (will trigger evasion through existing handlers)
+        noBtn.click();
     } else if (e.code === 'Enter' && questionScreen.classList.contains('active')) {
         e.preventDefault();
-        // Click Yes button
+        // Direct click on Yes button
         yesBtn.click();
     }
 });
@@ -638,7 +639,7 @@ function showSuccess() {
         Attempts: ${noBtnClicks}<br>
         Score: ${score}<br>
         Time: ${finalTime}<br>
-        Best Combo: ${Math.max(...Array.from({length: noBtnClicks}, (_, i) => combo))}x`;
+        Best Combo: ${maxCombo}x`;
     
     // Create floating hearts
     createHearts();
