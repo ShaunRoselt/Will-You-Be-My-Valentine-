@@ -22,11 +22,10 @@ const messages = [
 
 let messageIndex = 0;
 let noBtnClicks = 0;
-let currentStrategy = 0;
 let isMoving = false;
 
-// Track if device is mobile
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+// Track if device has touch support (more reliable than user agent)
+const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
 // Yes button click handler
 yesBtn.addEventListener('click', () => {
@@ -148,23 +147,43 @@ function handleNoButtonInteraction(e) {
     strategies[strategyIndex](e);
 }
 
-// Mouse events for desktop
+// Prevent all click events on No button - make it truly impossible to click
+noBtn.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleNoButtonInteraction(e);
+}, true);
+
+noBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleNoButtonInteraction(e);
+}, true);
+
+noBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleNoButtonInteraction(e);
+}, { passive: false, capture: true });
+
+noBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+}, { passive: false, capture: true });
+
+// Additional hover behavior for desktop
 noBtn.addEventListener('mouseenter', (e) => {
     if (!isMobile) {
         handleNoButtonInteraction(e);
     }
 });
 
-noBtn.addEventListener('click', (e) => {
+// Prevent pointer events from registering
+noBtn.addEventListener('pointerdown', (e) => {
     e.preventDefault();
+    e.stopPropagation();
     handleNoButtonInteraction(e);
-});
-
-// Touch events for mobile
-noBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    handleNoButtonInteraction(e);
-}, { passive: false });
+}, true);
 
 // Additional mouse move tracking for desktop
 if (!isMobile) {

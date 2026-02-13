@@ -105,6 +105,10 @@ body {
     color: #666;
     position: absolute;
     transition: all 0.2s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .no-btn.shrinking {
