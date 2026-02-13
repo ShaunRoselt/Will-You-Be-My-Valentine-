@@ -11,46 +11,15 @@
         <div id="question-screen" class="screen active">
             <h1 class="question">Will You Be My Valentine? 💝</h1>
             
-            <!-- Game Stats HUD -->
-            <div class="game-hud">
-                <div class="stat-item">
-                    <span class="stat-label">Attempts:</span>
-                    <span id="attempt-counter" class="stat-value">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Score:</span>
-                    <span id="score-counter" class="stat-value">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Combo:</span>
-                    <span id="combo-counter" class="stat-value">x1</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Time:</span>
-                    <span id="timer-display" class="stat-value">0:00</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Mode:</span>
-                    <span id="mode-indicator" class="stat-value">Easy</span>
-                </div>
+            <div class="buttons-container">
+                <button id="yes-btn" class="btn yes-btn">Yes</button>
+                <button id="no-btn" class="btn no-btn">No</button>
             </div>
-            
-            <div class="keyboard-hint">Press SPACE to attempt clicking No! ⌨️</div>
-            
-            <div class="buttons-container" id="game-area">
-                <button id="yes-btn" class="btn yes-btn">Yes! 😍</button>
-                <button id="no-btn" class="btn no-btn">No 😢</button>
-            </div>
-            <p id="encouragement" class="encouragement"></p>
-            
-            <!-- Achievements Display -->
-            <div id="achievements" class="achievements"></div>
         </div>
         
         <div id="success-screen" class="screen">
             <h1 class="celebration">Yay! 🎉💕</h1>
             <p class="success-message">I'm so happy! You've made my day! 💖</p>
-            <div class="hearts-container" id="hearts-container"></div>
         </div>
     </div>
     
