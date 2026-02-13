@@ -10,12 +10,35 @@
     <div class="container">
         <div id="question-screen" class="screen active">
             <h1 class="question">Will You Be My Valentine? 💝</h1>
-            <p id="attempt-counter" class="attempt-counter">Escape Attempts: 0 🎮</p>
-            <div class="buttons-container">
+            
+            <!-- Game Stats HUD -->
+            <div class="game-hud">
+                <div class="stat-item">
+                    <span class="stat-label">Attempts:</span>
+                    <span id="attempt-counter" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Score:</span>
+                    <span id="score-counter" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Combo:</span>
+                    <span id="combo-counter" class="stat-value">x1</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Mode:</span>
+                    <span id="mode-indicator" class="stat-value">Easy</span>
+                </div>
+            </div>
+            
+            <div class="buttons-container" id="game-area">
                 <button id="yes-btn" class="btn yes-btn">Yes! 😍</button>
                 <button id="no-btn" class="btn no-btn">No 😢</button>
             </div>
             <p id="encouragement" class="encouragement"></p>
+            
+            <!-- Achievements Display -->
+            <div id="achievements" class="achievements"></div>
         </div>
         
         <div id="success-screen" class="screen">

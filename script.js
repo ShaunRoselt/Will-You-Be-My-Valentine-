@@ -6,9 +6,17 @@ const successScreen = document.getElementById('success-screen');
 const encouragement = document.getElementById('encouragement');
 const heartsContainer = document.getElementById('hearts-container');
 const attemptCounter = document.getElementById('attempt-counter');
+const scoreCounter = document.getElementById('score-counter');
+const comboCounter = document.getElementById('combo-counter');
+const modeIndicator = document.getElementById('mode-indicator');
+const achievementsContainer = document.getElementById('achievements');
+const gameArea = document.getElementById('game-area');
 
 // Heart emojis for celebration
 const HEART_EMOJIS = ['❤️', '💕', '💖', '💗', '💝', '💞'];
+
+// Particle emojis for effects
+const PARTICLE_EMOJIS = ['✨', '💫', '⭐', '🌟', '💥', '🎯', '🎪', '🎨'];
 
 // Encouragement messages with phases
 const messages = [
@@ -41,10 +49,143 @@ const messages = [
 let messageIndex = 0;
 let noBtnClicks = 0;
 let isMoving = false;
-let gamePhase = 0; // Track game progression
+let gamePhase = 0;
+let score = 0;
+let combo = 1;
+let lastClickTime = 0;
+let comboTimer = null;
+const COMBO_TIMEOUT = 1500; // 1.5 seconds to maintain combo
+let totalMisses = 0;
+let fastestClick = Infinity;
+let unlockedAchievements = new Set();
 
 // Track if device has touch support (more reliable than user agent)
 const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+// Create particle effect at position
+function createParticles(x, y, count = 8) {
+    for (let i = 0; i < count; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.textContent = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)];
+        particle.style.left = x + 'px';
+        particle.style.top = y + 'px';
+        
+        const angle = (Math.PI * 2 * i) / count;
+        const distance = 50 + Math.random() * 50;
+        const tx = Math.cos(angle) * distance;
+        const ty = Math.sin(angle) * distance;
+        
+        particle.style.setProperty('--tx', tx + 'px');
+        particle.style.setProperty('--ty', ty + 'px');
+        
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), 1000);
+    }
+}
+
+// Show combo text
+function showComboText(x, y, comboValue) {
+    const comboText = document.createElement('div');
+    comboText.className = 'combo-text';
+    comboText.textContent = `COMBO x${comboValue}!`;
+    comboText.style.left = x + 'px';
+    comboText.style.top = y + 'px';
+    document.body.appendChild(comboText);
+    setTimeout(() => comboText.remove(), 1000);
+}
+
+// Show miss text
+function showMissText(x, y) {
+    const missText = document.createElement('div');
+    missText.className = 'miss-text';
+    missText.textContent = 'MISS!';
+    missText.style.left = x + 'px';
+    missText.style.top = y + 'px';
+    document.body.appendChild(missText);
+    setTimeout(() => missText.remove(), 800);
+}
+
+// Update score with animation
+function updateScore(points) {
+    score += points;
+    scoreCounter.textContent = score;
+    scoreCounter.classList.add('flash');
+    setTimeout(() => scoreCounter.classList.remove('flash'), 300);
+}
+
+// Update combo
+function updateCombo() {
+    const now = Date.now();
+    const timeSinceLastClick = now - lastClickTime;
+    
+    if (timeSinceLastClick < COMBO_TIMEOUT && noBtnClicks > 0) {
+        combo++;
+        if (combo % 5 === 0) {
+            const rect = noBtn.getBoundingClientRect();
+            showComboText(rect.left + rect.width / 2, rect.top);
+        }
+    } else {
+        combo = 1;
+    }
+    
+    comboCounter.textContent = `x${combo}`;
+    if (combo > 1) {
+        comboCounter.classList.add('flash');
+        setTimeout(() => comboCounter.classList.remove('flash'), 300);
+    }
+    
+    lastClickTime = now;
+    clearTimeout(comboTimer);
+    comboTimer = setTimeout(() => {
+        combo = 1;
+        comboCounter.textContent = 'x1';
+    }, COMBO_TIMEOUT);
+}
+
+// Check and award achievements
+function checkAchievements() {
+    const achievements = [
+        { id: 'first_attempt', condition: noBtnClicks === 1, text: '🎯 First Try!' },
+        { id: 'persistent', condition: noBtnClicks === 10, text: '💪 Persistent!' },
+        { id: 'determined', condition: noBtnClicks === 25, text: '🔥 Determined!' },
+        { id: 'unstoppable', condition: noBtnClicks === 50, text: '⚡ Unstoppable!' },
+        { id: 'combo_master', condition: combo === 10, text: '🎮 Combo Master!' },
+        { id: 'speed_demon', condition: fastestClick < 200, text: '⚡ Speed Demon!' },
+        { id: 'score_hunter', condition: score >= 500, text: '💎 Score Hunter!' },
+        { id: 'score_legend', condition: score >= 1000, text: '👑 Score Legend!' },
+    ];
+    
+    achievements.forEach(achievement => {
+        if (achievement.condition && !unlockedAchievements.has(achievement.id)) {
+            unlockedAchievements.add(achievement.id);
+            showAchievement(achievement.text);
+        }
+    });
+}
+
+// Show achievement notification
+function showAchievement(text) {
+    const achievement = document.createElement('div');
+    achievement.className = 'achievement';
+    achievement.textContent = '🏆 ' + text;
+    achievementsContainer.appendChild(achievement);
+    setTimeout(() => achievement.remove(), 3000);
+}
+
+// Update mode indicator
+function updateModeIndicator() {
+    const modes = ['Easy', 'Medium', 'Hard', 'Expert'];
+    modeIndicator.textContent = modes[gamePhase] || 'Easy';
+    modeIndicator.classList.add('flash');
+    setTimeout(() => modeIndicator.classList.remove('flash'), 300);
+}
+
+// Screen shake effect
+function shakeScreen() {
+    document.body.classList.add('shake');
+    setTimeout(() => document.body.classList.remove('shake'), 300);
+}
 
 // Yes button click handler
 yesBtn.addEventListener('click', () => {
@@ -216,35 +357,63 @@ const strategies = [
     },
 ];
 
-// Helper function to get attempt counter text based on game phase
-function getAttemptCounterText(attempts, phase) {
-    if (phase >= 3) {
-        return `Escape Attempts: ${attempts} 🔥 EXPERT MODE!`;
-    } else if (phase >= 2) {
-        return `Escape Attempts: ${attempts} ⚡ HARD MODE!`;
-    } else if (phase >= 1) {
-        return `Escape Attempts: ${attempts} 💪 MEDIUM MODE!`;
-    }
-    return `Escape Attempts: ${attempts} 🎮`;
-}
-
 // Handle no button interactions with game progression
 function handleNoButtonInteraction(e) {
     e.preventDefault();
     
-    noBtnClicks++;
-    
-    // Update game phase based on clicks
-    if (noBtnClicks >= 15) {
-        gamePhase = 3; // Expert mode - rapid teleports, corners
-    } else if (noBtnClicks >= 10) {
-        gamePhase = 2; // Hard mode - faster, more unpredictable
-    } else if (noBtnClicks >= 5) {
-        gamePhase = 1; // Medium mode - multiple strategies
+    const now = Date.now();
+    const clickSpeed = now - lastClickTime;
+    if (clickSpeed > 0 && clickSpeed < fastestClick) {
+        fastestClick = clickSpeed;
     }
     
-    // Update attempt counter with appropriate text
-    attemptCounter.textContent = getAttemptCounterText(noBtnClicks, gamePhase);
+    noBtnClicks++;
+    
+    // Get button position for effects
+    const rect = noBtn.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    
+    // Create particle effects
+    createParticles(x, y, 12);
+    
+    // Update combo
+    updateCombo();
+    
+    // Calculate score (base points * combo multiplier * phase multiplier)
+    const basePoints = 10;
+    const phaseMultiplier = 1 + gamePhase * 0.5;
+    const points = Math.floor(basePoints * combo * phaseMultiplier);
+    updateScore(points);
+    
+    // Update game phase based on clicks
+    const oldPhase = gamePhase;
+    if (noBtnClicks >= 15) {
+        gamePhase = 3; // Expert mode
+    } else if (noBtnClicks >= 10) {
+        gamePhase = 2; // Hard mode
+    } else if (noBtnClicks >= 5) {
+        gamePhase = 1; // Medium mode
+    }
+    
+    // Update mode indicator if phase changed
+    if (oldPhase !== gamePhase) {
+        updateModeIndicator();
+        shakeScreen();
+    }
+    
+    // Update attempt counter
+    attemptCounter.textContent = noBtnClicks;
+    attemptCounter.classList.add('flash');
+    setTimeout(() => attemptCounter.classList.remove('flash'), 300);
+    
+    // Check achievements
+    checkAchievements();
+    
+    // Special milestone effects
+    if (noBtnClicks % 10 === 0) {
+        shakeScreen();
+    }
     
     // Show encouragement message
     if (messageIndex < messages.length) {
@@ -387,6 +556,17 @@ if (!isMobile) {
         }
     });
 }
+
+// Click handler for game area (miss detection)
+gameArea.addEventListener('click', (e) => {
+    if (e.target === gameArea || e.target.classList.contains('buttons-container')) {
+        totalMisses++;
+        showMissText(e.clientX, e.clientY);
+        combo = 1;
+        comboCounter.textContent = 'x1';
+        clearTimeout(comboTimer);
+    }
+});
 
 // Show success screen
 function showSuccess() {
