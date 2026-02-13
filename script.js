@@ -11,6 +11,7 @@ const comboCounter = document.getElementById('combo-counter');
 const modeIndicator = document.getElementById('mode-indicator');
 const achievementsContainer = document.getElementById('achievements');
 const gameArea = document.getElementById('game-area');
+const timerDisplay = document.getElementById('timer-display');
 
 // Heart emojis for celebration
 const HEART_EMOJIS = ['❤️', '💕', '💖', '💗', '💝', '💞'];
@@ -58,9 +59,32 @@ const COMBO_TIMEOUT = 1500; // 1.5 seconds to maintain combo
 let totalMisses = 0;
 let fastestClick = Infinity;
 let unlockedAchievements = new Set();
+let gameStartTime = null;
+let timerInterval = null;
 
 // Track if device has touch support (more reliable than user agent)
 const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+// Timer functions
+function startTimer() {
+    if (!gameStartTime) {
+        gameStartTime = Date.now();
+        timerInterval = setInterval(updateTimer, 1000);
+    }
+}
+
+function updateTimer() {
+    const elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = elapsed % 60;
+    timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function stopTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+}
 
 // Create particle effect at position
 function createParticles(x, y, count = 8) {
@@ -369,6 +393,11 @@ function handleNoButtonInteraction(e) {
     
     noBtnClicks++;
     
+    // Start timer on first click
+    if (noBtnClicks === 1) {
+        startTimer();
+    }
+    
     // Get button position for effects
     const rect = noBtn.getBoundingClientRect();
     const x = rect.left + rect.width / 2;
@@ -568,10 +597,42 @@ gameArea.addEventListener('click', (e) => {
     }
 });
 
+// Keyboard controls
+document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' && questionScreen.classList.contains('active')) {
+        e.preventDefault();
+        // Try to click the No button
+        const rect = noBtn.getBoundingClientRect();
+        const clickEvent = new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            clientX: rect.left + rect.width / 2,
+            clientY: rect.top + rect.height / 2
+        });
+        noBtn.dispatchEvent(clickEvent);
+    } else if (e.code === 'Enter' && questionScreen.classList.contains('active')) {
+        e.preventDefault();
+        // Click Yes button
+        yesBtn.click();
+    }
+});
+
 // Show success screen
 function showSuccess() {
+    stopTimer();
+    
     questionScreen.classList.remove('active');
     successScreen.classList.add('active');
+    
+    // Show final stats
+    const finalTime = timerDisplay.textContent;
+    const successMessage = document.querySelector('.success-message');
+    successMessage.innerHTML = `I'm so happy! You've made my day! 💖<br><br>
+        <strong>Final Stats:</strong><br>
+        Attempts: ${noBtnClicks}<br>
+        Score: ${score}<br>
+        Time: ${finalTime}<br>
+        Best Combo: ${Math.max(...Array.from({length: noBtnClicks}, (_, i) => combo))}x`;
     
     // Create floating hearts
     createHearts();
