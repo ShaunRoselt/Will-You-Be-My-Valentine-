@@ -121,8 +121,10 @@ body::after {
 .no-btn {
     background: linear-gradient(135deg, #ffd6e8 0%, #ffe4f0 100%);
     color: #666;
-    position: absolute;
+    position: fixed;
     transition: all 0.2s ease;
+    z-index: 1000;
+}
 }
 
 .no-btn::after {

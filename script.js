@@ -18,20 +18,46 @@ noBtn.addEventListener('mouseenter', () => {
     moveNoButton();
 });
 
-// Move No button to random position
+// Move No button to random position across the entire page
 function moveNoButton() {
     isMoving = true;
     
-    const container = document.querySelector('.buttons-container');
-    const containerRect = container.getBoundingClientRect();
+    const yesRect = yesBtn.getBoundingClientRect();
+    const noWidth = noBtn.offsetWidth;
+    const noHeight = noBtn.offsetHeight;
     
-    // Calculate random position within the container
-    const maxX = containerRect.width - noBtn.offsetWidth;
-    const maxY = containerRect.height - noBtn.offsetHeight;
+    // Get viewport dimensions
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
     
-    const randomX = Math.random() * maxX;
-    const randomY = Math.random() * maxY;
+    // Calculate available space
+    const maxX = viewportWidth - noWidth - 20; // 20px margin
+    const maxY = viewportHeight - noHeight - 20;
     
+    let randomX, randomY;
+    let attempts = 0;
+    const maxAttempts = 50;
+    
+    // Keep trying until we find a position that doesn't overlap with Yes button
+    do {
+        randomX = Math.random() * maxX;
+        randomY = Math.random() * maxY;
+        attempts++;
+        
+        // Check if the new position would overlap with Yes button
+        const wouldOverlap = !(
+            randomX + noWidth < yesRect.left ||
+            randomX > yesRect.right ||
+            randomY + noHeight < yesRect.top ||
+            randomY > yesRect.bottom
+        );
+        
+        if (!wouldOverlap || attempts >= maxAttempts) {
+            break;
+        }
+    } while (true);
+    
+    noBtn.style.position = 'fixed';
     noBtn.style.left = randomX + 'px';
     noBtn.style.top = randomY + 'px';
     
@@ -72,13 +98,10 @@ document.addEventListener('mousemove', (e) => {
 
 // Initialize no button position
 window.addEventListener('load', () => {
-    const container = document.querySelector('.buttons-container');
-    const containerRect = container.getBoundingClientRect();
+    const yesRect = yesBtn.getBoundingClientRect();
     
-    // Position No button to the right initially
-    const initialX = containerRect.width / 2 + 20;
-    const initialY = 0;
-    
-    noBtn.style.left = initialX + 'px';
-    noBtn.style.top = initialY + 'px';
+    // Position No button to the right of Yes button initially
+    noBtn.style.position = 'fixed';
+    noBtn.style.left = (yesRect.right + 100) + 'px';
+    noBtn.style.top = yesRect.top + 'px';
 });
