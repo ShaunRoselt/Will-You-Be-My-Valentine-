@@ -125,11 +125,6 @@ body::after {
     transition: all 0.2s ease;
     z-index: 1000;
 }
-}
-
-.no-btn::after {
-    content: ' 🦊';
-}
 
 .celebration {
     color: white;

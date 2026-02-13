@@ -34,9 +34,12 @@ function moveNoButton() {
     const maxX = viewportWidth - noWidth - 20; // 20px margin
     const maxY = viewportHeight - noHeight - 20;
     
+    // Buffer zone around Yes button to ensure no overlap
+    const bufferZone = 50; // 50px buffer
+    
     let randomX, randomY;
     let attempts = 0;
-    const maxAttempts = 50;
+    const maxAttempts = 100;
     
     // Keep trying until we find a position that doesn't overlap with Yes button
     do {
@@ -44,14 +47,27 @@ function moveNoButton() {
         randomY = Math.random() * maxY;
         attempts++;
         
-        // Check if the new position would overlap with Yes button
+        // Calculate the bounds of the No button at this position
+        const noLeft = randomX;
+        const noRight = randomX + noWidth;
+        const noTop = randomY;
+        const noBottom = randomY + noHeight;
+        
+        // Calculate Yes button bounds with buffer zone
+        const yesLeft = yesRect.left - bufferZone;
+        const yesRight = yesRect.right + bufferZone;
+        const yesTop = yesRect.top - bufferZone;
+        const yesBottom = yesRect.bottom + bufferZone;
+        
+        // Check if No button would overlap with Yes button (including buffer)
         const wouldOverlap = !(
-            randomX + noWidth < yesRect.left ||
-            randomX > yesRect.right ||
-            randomY + noHeight < yesRect.top ||
-            randomY > yesRect.bottom
+            noRight < yesLeft ||    // No button is completely to the left
+            noLeft > yesRight ||     // No button is completely to the right
+            noBottom < yesTop ||     // No button is completely above
+            noTop > yesBottom        // No button is completely below
         );
         
+        // If no overlap, we found a good position
         if (!wouldOverlap || attempts >= maxAttempts) {
             break;
         }
@@ -82,8 +98,8 @@ document.addEventListener('mousemove', (e) => {
     const proximityThreshold = 150;
     
     if (distance < proximityThreshold) {
-        // Mouse is getting close - shrink the button
-        const scale = Math.max(0.3, distance / proximityThreshold);
+        // Mouse is getting close - GROW the button (reverse of previous behavior)
+        const scale = Math.min(2.0, 1.0 + (1.0 - distance / proximityThreshold));
         noBtn.style.transform = `scale(${scale})`;
         
         // Also move the button if mouse gets too close
