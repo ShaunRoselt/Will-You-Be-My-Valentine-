@@ -7,6 +7,9 @@ const encouragement = document.getElementById('encouragement');
 const heartsContainer = document.getElementById('hearts-container');
 const attemptCounter = document.getElementById('attempt-counter');
 
+// Heart emojis for celebration
+const HEART_EMOJIS = ['❤️', '💕', '💖', '💗', '💝', '💞'];
+
 // Encouragement messages with phases
 const messages = [
     // Phase 1: Gentle persuasion
@@ -213,26 +216,35 @@ const strategies = [
     },
 ];
 
+// Helper function to get attempt counter text based on game phase
+function getAttemptCounterText(attempts, phase) {
+    if (phase >= 3) {
+        return `Escape Attempts: ${attempts} 🔥 EXPERT MODE!`;
+    } else if (phase >= 2) {
+        return `Escape Attempts: ${attempts} ⚡ HARD MODE!`;
+    } else if (phase >= 1) {
+        return `Escape Attempts: ${attempts} 💪 MEDIUM MODE!`;
+    }
+    return `Escape Attempts: ${attempts} 🎮`;
+}
+
 // Handle no button interactions with game progression
 function handleNoButtonInteraction(e) {
     e.preventDefault();
     
     noBtnClicks++;
     
-    // Update attempt counter
-    attemptCounter.textContent = `Escape Attempts: ${noBtnClicks} 🎮`;
-    
     // Update game phase based on clicks
     if (noBtnClicks >= 15) {
         gamePhase = 3; // Expert mode - rapid teleports, corners
-        attemptCounter.textContent = `Escape Attempts: ${noBtnClicks} 🔥 EXPERT MODE!`;
     } else if (noBtnClicks >= 10) {
         gamePhase = 2; // Hard mode - faster, more unpredictable
-        attemptCounter.textContent = `Escape Attempts: ${noBtnClicks} ⚡ HARD MODE!`;
     } else if (noBtnClicks >= 5) {
         gamePhase = 1; // Medium mode - multiple strategies
-        attemptCounter.textContent = `Escape Attempts: ${noBtnClicks} 💪 MEDIUM MODE!`;
     }
+    
+    // Update attempt counter with appropriate text
+    attemptCounter.textContent = getAttemptCounterText(noBtnClicks, gamePhase);
     
     // Show encouragement message
     if (messageIndex < messages.length) {
@@ -400,7 +412,7 @@ function createHearts() {
         setTimeout(() => {
             const heart = document.createElement('div');
             heart.className = 'heart';
-            heart.textContent = ['❤️', '💕', '💖', '💗', '💝', '💞'][Math.floor(Math.random() * 6)];
+            heart.textContent = HEART_EMOJIS[Math.floor(Math.random() * HEART_EMOJIS.length)];
             heart.style.left = Math.random() * 100 + '%';
             heart.style.animationDelay = Math.random() * 0.5 + 's';
             heartsContainer.appendChild(heart);
