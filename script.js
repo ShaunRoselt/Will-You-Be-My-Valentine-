@@ -12,6 +12,7 @@ const modeIndicator = document.getElementById('mode-indicator');
 const achievementsContainer = document.getElementById('achievements');
 const gameArea = document.getElementById('game-area');
 const timerDisplay = document.getElementById('timer-display');
+const keyboardHint = document.querySelector('.keyboard-hint');
 
 // Heart emojis for celebration
 const HEART_EMOJIS = ['❤️', '💕', '💖', '💗', '💝', '💞'];
@@ -64,6 +65,11 @@ let timerInterval = null;
 
 // Track if device has touch support (more reliable than user agent)
 const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+// Hide keyboard hint on mobile devices
+if (isMobile && keyboardHint) {
+    keyboardHint.style.display = 'none';
+}
 
 // Timer functions
 function startTimer() {

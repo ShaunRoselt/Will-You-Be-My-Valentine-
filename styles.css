@@ -344,36 +344,6 @@ body {
     }
 }
 
-/* Mobile responsive */
-@media (max-width: 768px) {
-    .question {
-        font-size: 2rem;
-        margin-bottom: 2rem;
-    }
-    
-    .btn {
-        padding: 12px 30px;
-        font-size: 1.2rem;
-    }
-    
-    .buttons-container {
-        gap: 1.5rem;
-        min-height: 150px;
-    }
-    
-    .celebration {
-        font-size: 2.5rem;
-    }
-    
-    .success-message {
-        font-size: 1.5rem;
-    }
-    
-    .encouragement {
-        font-size: 1rem;
-    }
-}
-
 /* Particle Effects */
 .particle {
     position: absolute;
@@ -469,9 +439,107 @@ body {
 }
 
 /* Mobile responsive */
+@media (max-width: 768px) {
+    .question {
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .game-hud {
+        gap: 0.5rem;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-item {
+        gap: 0.15rem;
+    }
+    
+    .stat-label {
+        font-size: 0.7rem;
+    }
+    
+    .stat-value {
+        font-size: 1.2rem;
+    }
+    
+    .keyboard-hint {
+        font-size: 0.8rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .btn {
+        padding: 12px 30px;
+        font-size: 1.2rem;
+    }
+    
+    .buttons-container {
+        gap: 1.5rem;
+        min-height: 150px;
+    }
+    
+    .achievements {
+        top: 10px;
+        right: 10px;
+    }
+    
+    .achievement {
+        font-size: 0.8rem;
+        padding: 8px 16px;
+    }
+    
+    .particle {
+        font-size: 1.2rem;
+    }
+    
+    .combo-text {
+        font-size: 2rem;
+    }
+    
+    .miss-text {
+        font-size: 1.5rem;
+    }
+    
+    .celebration {
+        font-size: 2.5rem;
+    }
+    
+    .success-message {
+        font-size: 1.5rem;
+    }
+    
+    .encouragement {
+        font-size: 1rem;
+    }
+}
+
 @media (max-width: 480px) {
     .question {
         font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .game-hud {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+    
+    .stat-item {
+        min-width: 30%;
+    }
+    
+    .stat-label {
+        font-size: 0.65rem;
+    }
+    
+    .stat-value {
+        font-size: 1rem;
+    }
+    
+    .keyboard-hint {
+        font-size: 0.7rem;
+        display: none; /* Hide on very small screens */
     }
     
     .btn {
@@ -479,11 +547,33 @@ body {
         font-size: 1rem;
     }
     
+    .buttons-container {
+        min-height: 120px;
+    }
+    
+    .achievement {
+        font-size: 0.75rem;
+        padding: 6px 12px;
+    }
+    
+    .particle {
+        font-size: 1rem;
+    }
+    
+    .combo-text {
+        font-size: 1.5rem;
+    }
+    
+    .miss-text {
+        font-size: 1.2rem;
+    }
+    
     .celebration {
         font-size: 2rem;
     }
     
     .success-message {
-        font-size: 1.2rem;
+        font-size: 1rem;
+        line-height: 1.5;
     }
 }
